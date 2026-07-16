@@ -3,7 +3,7 @@
 
 this is a simon-says-style game in the shell of an IKEA blåhaj! powered by the ADXL345 accelerometer and the Orpheus Pico!
 * to play, simply whack the sharkie on the illuminated area part of their body. follow the pattern!
-* accelerometers track impacts made to the plushie, with the pico inside tracking the player's gameplay and sending signals to an external laptop which plays sound effects
+* accelerometers track impacts made to the plushie, with the pico inside tracking the player's gameplay and sending signals to an external laptop which plays sound effects <br/>
 <img src="assets/demo.jpg" height="600"> <br/>
 <img src="assets/zine.png" height="600"> <br/>
 
