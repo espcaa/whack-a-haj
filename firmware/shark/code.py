@@ -13,13 +13,14 @@ for led_pin in led_pins:
     led.value = False
     leds.append(led)
 
+uart = busio.UART(board.GP0, board.GP1, baudrate=115200)
+
 spi = busio.SPI(board.GP6, MOSI=board.GP7, MISO=board.GP16)
 while not spi.try_lock():
     pass
 spi.configure(baudrate=5000000, phase=1, polarity=1)
 
-# CS pins: left, right, top, down
-LEFT, RIGHT, TOP, DOWN = 0, 1, 2, 3
+LEFT, RIGHT, UP, DOWN = 0, 1, 2, 3
 cs_pins = [board.GP28, board.GP27, board.GP22, board.GP20]
 accelerometers = []
 
@@ -37,9 +38,14 @@ SCALE_FACTOR = 0.004
 FILTER_WINDOW = 5
 SIDE_SENSITIVITY = 3.0
 SHAKE_THRESHOLD = 0.5
-names = ["BLÅHAJ", "DJUNGELSKOG", "SNUTTIG", "SKOGSDUVA"]
+DEBOUNCE_TIME = 1.0
+
 history = [deque((0.0, 0.0, 0.0) for _ in range(FILTER_WINDOW), FILTER_WINDOW) for _ in range(4)]
 mag_history = [deque((0.0,) * FILTER_WINDOW, FILTER_WINDOW) for _ in range(4)]
+last_hit_time = [0.0] * 4
+
+DIRECTION_NAMES = ["LEFT", "RIGHT", "UP", "DOWN"]
+DIRECTION_MAP = {"LEFT": LEFT, "RIGHT": RIGHT, "UP": UP, "DOWN": DOWN}
 
 
 def bytes_to_int16(low_byte, high_byte):
@@ -104,7 +110,7 @@ resting = [(x / 20, y / 20, z / 20) for x, y, z in resting]
 for i in range(4):
     leds[i].value = False
 
-led_timeout = 0.0
+rx_buffer = ""
 
 while True:
     magnitudes = [0.0] * 4
@@ -130,16 +136,25 @@ while True:
     avg_mags = [sum(mh) / len(mh) for mh in mag_history]
 
     now = time.monotonic()
-    if led_timeout and now >= led_timeout:
-        led_timeout = 0.0
-        for i in range(4):
-            leds[i].value = False
-
     if max(magnitudes) > SHAKE_THRESHOLD:
         hit = max(range(4), key=lambda i: avg_mags[i])
-        for i in range(4):
-            leds[i].value = (i == hit)
-        led_timeout = now + 1.0
+        if now - last_hit_time[hit] >= DEBOUNCE_TIME:
+            uart.write(f"{DIRECTION_NAMES[hit]}&&".encode())
+            last_hit_time[hit] = now
 
+    if uart.in_waiting:
+        rx_buffer += uart.read(uart.in_waiting).decode()
+        while "&&" in rx_buffer:
+            idx = rx_buffer.index("&&")
+            command = rx_buffer[:idx]
+            rx_buffer = rx_buffer[idx + 2:]
+            if command.startswith("LIGHTON+"):
+                direction = command[8:]
+                if direction in DIRECTION_MAP:
+                    leds[DIRECTION_MAP[direction]].value = True
+            elif command.startswith("LIGHTOFF+"):
+                direction = command[9:]
+                if direction in DIRECTION_MAP:
+                    leds[DIRECTION_MAP[direction]].value = False
 
     time.sleep(0.05)
