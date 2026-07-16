@@ -139,13 +139,13 @@ while True:
     if max(magnitudes) > SHAKE_THRESHOLD:
         hit = max(range(4), key=lambda i: avg_mags[i])
         if now - last_hit_time[hit] >= DEBOUNCE_TIME:
-            uart.write(f"{DIRECTION_NAMES[hit]}&&".encode())
+            uart.write(f"{DIRECTION_NAMES[hit]}\n".encode())
             last_hit_time[hit] = now
 
     if uart.in_waiting:
         rx_buffer += uart.read(uart.in_waiting).decode()
-        while "&&" in rx_buffer:
-            idx = rx_buffer.index("&&")
+        while "\n" in rx_buffer:
+            idx = rx_buffer.index("\n")
             command = rx_buffer[:idx]
             rx_buffer = rx_buffer[idx + 2:]
             if command.startswith("LIGHTON+"):
