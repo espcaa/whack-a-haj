@@ -7,7 +7,9 @@ this is a simon-says-style game in the shell of an IKEA blåhaj! powered by the 
 <img src="assets/zine.png" height="600">
 
 ## wiring diagram
-<img width="962" height="669" alt="image" src="https://github.com/user-attachments/assets/49e8acc1-1405-4ec2-8b9f-985a6ea2bb71" />
+<img width="962" height="669" alt="image" src="https://github.com/user-attachments/assets/49e8acc1-1405-4ec2-8b9f-985a6ea2bb71" /> <br/>
+<img width="1192" height="583" alt="image" src="https://github.com/user-attachments/assets/dd8e1132-64b0-4278-a1ae-35cecef28ac1" /> <br/>
+
 
 ## cad
 <img width="686" height="453" alt="image" src="https://github.com/user-attachments/assets/e6af595c-ae8b-41ca-9d43-7aeb7617fadf" /> <br/>
